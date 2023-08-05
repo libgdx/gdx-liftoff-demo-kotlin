@@ -45,7 +45,6 @@ android {
     targetCompatibility "11"
     coreLibraryDesugaringEnabled true
   }
-  kotlinOptions.jvmTarget = "1.8"
   buildTypes {
     release {
       minifyEnabled true
@@ -53,6 +52,9 @@ android {
     }
   }
 
+  kotlin {
+    jvmToolchain(11)
+  }
 }
 
 repositories {
