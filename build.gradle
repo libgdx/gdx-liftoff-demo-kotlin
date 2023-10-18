@@ -9,7 +9,7 @@ buildscript {
     maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
   }
   dependencies {
-    classpath "com.android.tools.build:gradle:8.1.1"
+    classpath "com.android.tools.build:gradle:8.1.2"
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
 
   }
@@ -37,7 +37,7 @@ configure(subprojects - project(':android')) {
 }
 
 subprojects {
-  version = '1.12.0.4'
+  version = '1.12.0.5'
   ext.appName = 'gdx-liftoff-demo-kotlin'
   repositories {
     mavenCentral()
