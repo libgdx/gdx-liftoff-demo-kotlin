@@ -62,7 +62,7 @@ configure(subprojects - project(':android')) {
 }
 
 subprojects {
-  version = '1.12.1.5'
+  version = '1.12.1.6'
   ext.appName = 'gdx-liftoff-demo-kotlin'
   repositories {
     mavenCentral()
