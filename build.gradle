@@ -52,17 +52,12 @@ configure(subprojects - project(':android')) {
       assetsFile.append(it + "\n")
     }
   }
-  compileKotlin {
-    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
-  }
-
-  kotlin {
-    jvmToolchain(11)
-  }
+  compileKotlin.compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+  
 }
 
 subprojects {
-  version = '1.12.1.6'
+  version = '1.12.1.8'
   ext.appName = 'gdx-liftoff-demo-kotlin'
   repositories {
     mavenCentral()

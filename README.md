@@ -1,6 +1,6 @@
 # gdx-liftoff-demo-kotlin
 
-A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://github.com/tommyettinger/gdx-liftoff).
+A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://github.com/libgdx/gdx-liftoff).
 
 This project was generated with a template that includes Kotlin application launchers and draws the libGDX logo within the application listener.
 
@@ -14,7 +14,7 @@ This project was generated with a template that includes Kotlin application laun
 
 ## Gradle
 
-This project uses [Gradle](http://gradle.org/) to manage dependencies.
+This project uses [Gradle](https://gradle.org/) to manage dependencies.
 The Gradle wrapper was included, so you can run Gradle tasks using `gradlew.bat` or `./gradlew` commands.
 Useful Gradle tasks and flags:
 
