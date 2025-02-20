@@ -10,7 +10,7 @@ This project was generated with a template that includes Kotlin application laun
 - `lwjgl3`: Primary desktop platform using LWJGL3; was called 'desktop' in older docs.
 - `android`: Android mobile platform. Needs Android SDK.
 - `ios`: iOS mobile platform using RoboVM.
-- `teavm`: Experimental web platform using TeaVM and WebGL.
+- `teavm`: Web backend that supports most JVM languages.
 
 ## Gradle
 
