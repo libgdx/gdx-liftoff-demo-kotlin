@@ -24,7 +24,7 @@ object TeaVMBuilder {
 
         val tool = TeaBuilder.config(teaBuildConfiguration)
         tool.mainClass = "gdx.liftoff.teavm.TeaVMLauncher"
-        tool.optimizationLevel = TeaVMOptimizationLevel.FULL
+        tool.optimizationLevel = TeaVMOptimizationLevel.ADVANCED
         tool.setObfuscated(true)
         TeaBuilder.build(tool)
     }
