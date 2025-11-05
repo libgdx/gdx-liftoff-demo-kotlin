@@ -3,10 +3,13 @@ package gdx.liftoff.teavm
 import java.io.File
 import com.github.xpenatan.gdx.backends.teavm.config.AssetFileHandle
 import com.github.xpenatan.gdx.backends.teavm.config.TeaBuildConfiguration
+import com.github.xpenatan.gdx.backends.teavm.config.TeaBuildReflectionListener
 import com.github.xpenatan.gdx.backends.teavm.config.TeaBuilder
 import com.github.xpenatan.gdx.backends.teavm.config.plugins.TeaReflectionSupplier
+import org.teavm.backend.wasm.WasmDebugInfoLevel
 import org.teavm.tooling.TeaVMSourceFilePolicy
 import org.teavm.tooling.TeaVMTargetType
+import org.teavm.tooling.TeaVMTool
 import org.teavm.tooling.sources.DirectorySourceFileProvider
 import org.teavm.vm.TeaVMOptimizationLevel
 
@@ -27,13 +30,23 @@ object TeaVMBuilder {
             assetsPath.add(AssetFileHandle("../assets"))
             webappPath = File("build/dist").canonicalPath
             // Register any extra classpath assets here:
-            // additionalAssetsClasspathFiles += "gdx/liftoff/asset.extension"
+//            additionalAssetsClasspathFiles += "gdx/liftoff/asset.extension"
         }
 
-        // Register any classes or packages that require reflection here:
+        // If you need to match specific classes based on the package and class name,
+        // you can use the reflectionListener to do fine-grained matching on the String fullClassName.
+//        teaBuildConfiguration.reflectionListener = TeaBuildReflectionListener { fullClassName: String? ->
+//            if (fullClassName!!.startsWith("where.your.reflective.code.is") &&
+//                fullClassName.endsWith("YourSuffix"))
+//                return@TeaBuildReflectionListener true
+//            false
+//        }
+
+        // You can also register any classes or packages that require reflection here:
         // TeaReflectionSupplier.addReflectionClass("gdx.liftoff.reflect")
 
-        val tool = TeaBuilder.config(teaBuildConfiguration)
+        TeaBuilder.config(teaBuildConfiguration)
+        val tool = TeaVMTool()
 
         // JavaScript is the default target type for TeaVM, and it works better during debugging.
         tool.targetType = TeaVMTargetType.JAVASCRIPT
@@ -45,19 +58,21 @@ object TeaVMBuilder {
         tool.mainClass = "gdx.liftoff.teavm.TeaVMLauncher"
         // For many (or most) applications, using a high optimization won't add much to build time.
         // If your builds take too long, and runtime performance doesn't matter, you can change ADVANCED to SIMPLE .
-        tool.optimizationLevel = TeaVMOptimizationLevel.ADVANCED
-        // The line below should use tool.setObfuscated(false) if you want clear debugging info.
-        // You can change it to tool.setObfuscated(true) when you are preparing to release, to try to hide your original code.
+        // Using SIMPLE makes debugging easier, also, so it is used when DEBUG is enabled.
+        tool.optimizationLevel = if(DEBUG) TeaVMOptimizationLevel.SIMPLE else TeaVMOptimizationLevel.ADVANCED
+        // The line below will make the generated code hard to read (and smaller) in releases and easier to follow
+        // when DEBUG is true. Setting DEBUG to false should always be done before a release, anyway.
         tool.setObfuscated(!DEBUG)
 
-        // If targetType is set to JAVASCRIPT, you can use the following lines to debug JVM languages from the browser,
-        // setting breakpoints in Kotlin code and stopping in the appropriate place in generated JavaScript code.
-        // These settings don't quite work currently if generating WebAssembly. They may in a future release.
-        if(DEBUG && tool.targetType == TeaVMTargetType.JAVASCRIPT) {
+        // If DEBUG is set to true, these lines allow step-debugging JVM languages from the browser,
+        // setting breakpoints in Java code and stopping in the appropriate place in generated browser code.
+        // This may work reasonably well when targeting WEBASSEMBLY_GC, but it usually works better with JAVASCRIPT .
+        if(DEBUG) {
             tool.isDebugInformationGenerated = true
             tool.isSourceMapsFileGenerated = true
+            tool.setWasmDebugInfoLevel(WasmDebugInfoLevel.FULL)
             tool.setSourceFilePolicy(TeaVMSourceFilePolicy.COPY)
-            tool.addSourceFileProvider(DirectorySourceFileProvider(File("../core/src/main/java/")))
+            tool.addSourceFileProvider(DirectorySourceFileProvider(File("../core/src/main/kotlin/")))
         }
 
         TeaBuilder.build(tool)

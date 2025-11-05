@@ -23,12 +23,6 @@ dependencies {
   implementation "com.github.xpenatan.gdx-teavm:backend-teavm:$gdxTeaVMVersion"
   implementation "com.github.xpenatan.gdx-teavm:gdx-bullet-teavm:1.0.0-b6"
   implementation "com.github.xpenatan.gdx-teavm:gdx-freetype-teavm:$gdxTeaVMVersion"
-  implementation "org.teavm:teavm-classlib:$teaVMVersion"
-  implementation "org.teavm:teavm-core:$teaVMVersion"
-  implementation "org.teavm:teavm-jso-apis:$teaVMVersion"
-  implementation "org.teavm:teavm-jso-impl:$teaVMVersion"
-  implementation "org.teavm:teavm-jso:$teaVMVersion"
-  implementation "org.teavm:teavm-tooling:$teaVMVersion"
   implementation project(':core')
 
 }
