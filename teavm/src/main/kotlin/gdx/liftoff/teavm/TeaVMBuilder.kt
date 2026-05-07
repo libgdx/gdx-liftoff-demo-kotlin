@@ -20,10 +20,11 @@ object TeaVMBuilder {
             .setHtmlHeight(600) // Change this to fit your game's requirements.
             .setStartJettyAfterBuild(startJetty)
             .setJettyPort(8080)
-//            .setWebAssembly(true) // Uncomment this line to use WASM output instead of JavaScript output.
+            .setWebAssembly(true) // Comment this line to use JavaScript output instead of WASM output.
 
         TeaCompiler(webBackend)
             .addAssets(AssetFileHandle("../assets"))
+            
             .setOptimizationLevel(if (debug) TeaVMOptimizationLevel.SIMPLE else TeaVMOptimizationLevel.ADVANCED)
             .setMainClass("gdx.liftoff.teavm.TeaVMLauncher")
             .setObfuscated(!debug)
