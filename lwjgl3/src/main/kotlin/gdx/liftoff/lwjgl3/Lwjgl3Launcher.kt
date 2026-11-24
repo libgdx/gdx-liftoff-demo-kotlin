@@ -4,6 +4,8 @@ package gdx.liftoff.lwjgl3
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
+import com.badlogic.gdx.scenes.scene2d.utils.UIUtils
+import org.lwjgl.glfw.GLFW
 import gdx.liftoff.Main
 
 /** Launches the desktop (LWJGL3) application. */
@@ -11,6 +13,16 @@ fun main() {
     // This handles macOS support and helps on Windows.
     if (StartupHelper.startNewJvmIfRequired())
       return
+
+    // Prefer X11 when on Linux and there is a display.
+    // This is only useful when lwjgl3Version is greater than 3.3.3 .
+    // Doing this may be required to Snap-package this application or to publish via Steam.
+    // It may require XWayland, a compatibility layer, on machines using Wayland.
+    // LWJGL 3.3.3 and earlier always use X11 compatibility, and don't need this hint.
+    if (UIUtils.isLinux && !System.getenv("DISPLAY").isNullOrEmpty()) {
+        GLFW.glfwInitHint(GLFW.GLFW_PLATFORM, GLFW.GLFW_PLATFORM_X11)
+    }
+
     Lwjgl3Application(Main(), Lwjgl3ApplicationConfiguration().apply {
         setTitle("gdx-liftoff-demo-kotlin")
         //// Vsync limits the frames per second to what your hardware can display, and helps eliminate

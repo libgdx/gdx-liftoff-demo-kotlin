@@ -4,7 +4,7 @@ buildscript {
     gradlePluginPortal()
   }
   dependencies {
-    classpath "io.github.fourlastor:construo:2.2.2"
+    classpath "io.github.fourlastor:construo:2.3.0"
     if(enableGraalNative == 'true') {
       classpath "org.graalvm.buildtools.native:org.graalvm.buildtools.native.gradle.plugin:0.9.28"
     }
@@ -38,6 +38,7 @@ dependencies {
   if(enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-backend-lwjgl3:$graalHelperVersion"
 
+
   }
   // Forces LWJGL3 to use at least $lwjgl3Version, currently 3.4.3, to avoid warnings on Java 25 and up.
   constraints{
@@ -57,10 +58,27 @@ run {
 // You can uncomment the next line if your IDE claims a build failure even when the app closed properly.
   //setIgnoreExitValue(true)
 // The next two jvmArgs additions help LWJGL3 on JDK 24 and higher.
-  jvmArgs += "--enable-native-access=ALL-UNNAMED"
-  jvmArgs += "--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED"
+// They only are valid when running with a non-JDK-8 version, but Gradle needs 17 at this point...
+// We still restrict the version for good measure.
+  if (JavaVersion.current().isJava9Compatible()) {
+    jvmArgs += "--enable-native-access=ALL-UNNAMED"
+    jvmArgs += "--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED"
+  }
+// JDK 22 and later start allowing, to prepare for forcing, restrictions on sun.misc.Unsafe usage.
+// We are restricting Unsafe because with LWJGL 3.4.3, we can without issues, and because it will eventually be required.
+  if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_22)) {
+    jvmArgs += ["--sun-misc-unsafe-memory-access=deny"]
+  }
 // On macOS, we need to set this for the run task to allow debugging in IDEA or AS to work.
   if (os.contains('mac')) jvmArgs += "-XstartOnFirstThread"
+}
+
+// These two blocks duplicate the settings for the run task, but should apply to the built JAR.
+if (JavaVersion.current().isJava9Compatible()) {
+  application.applicationDefaultJvmArgs += ["--enable-native-access=ALL-UNNAMED", "--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED"]
+}
+if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_22)) {
+  application.applicationDefaultJvmArgs += ["--sun-misc-unsafe-memory-access=deny"]
 }
 
 jar {
@@ -144,12 +162,20 @@ construo {
   targets.configure {
     register("linuxX64", Target.Linux) {
       architecture.set(Target.Architecture.X86_64)
-      jdkUrl.set("https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.10%2B7/OpenJDK21U-jdk_x64_linux_hotspot_21.0.10_7.tar.gz")
+// You can use the JetBrains Runtime SDK for Java 25 if you need newer language features or better Wayland support.
+// This needs you to build using Java 25 as the JDK Gradle uses.
+//      jdkUrl.set("https://cache-redirector.jetbrains.com/intellij-jbr/jbrsdk-25.0.5.1-linux-x64-b635.102.tar.gz")
+// Or, if you are using Java 21 to build, you can use a standard Adoptium Java 21 JDK instead.
+      jdkUrl.set("https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13.1%2B2/OpenJDK21U-jdk_x64_linux_hotspot_21.0.13.1_2.tar.gz")
       // Linux does not currently have a way to set the icon on the executable
     }
     register("macM1", Target.MacOs) {
       architecture.set(Target.Architecture.AARCH64)
-      jdkUrl.set("https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.10%2B7/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.10_7.tar.gz")
+// You can use the JetBrains Runtime SDK for Java 25 if you need newer language features.
+// This needs you to build using Java 25 as the JDK Gradle uses.
+//      jdkUrl.set("https://cache-redirector.jetbrains.com/intellij-jbr/jbrsdk-25.0.5.1-osx-aarch64-b635.102.tar.gz")
+// Or, if you are using Java 21 to build, you can use a standard Adoptium Java 21 JDK instead.
+      jdkUrl.set("https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13.1%2B2/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.13.1_2.tar.gz")
       // macOS needs an identifier
       identifier.set("gdx.liftoff." + appName)
       // Optional: icon for macOS, as an ICNS file
@@ -157,7 +183,11 @@ construo {
     }
     register("macX64", Target.MacOs) {
       architecture.set(Target.Architecture.X86_64)
-      jdkUrl.set("https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.10%2B7/OpenJDK21U-jdk_x64_mac_hotspot_21.0.10_7.tar.gz")
+// You can use the JetBrains Runtime SDK for Java 25 if you need newer language features.
+// This needs you to build using Java 25 as the JDK Gradle uses.
+//      jdkUrl.set("https://cache-redirector.jetbrains.com/intellij-jbr/jbrsdk-25.0.5.1-osx-x64-b635.102.tar.gz")
+// Or, if you are using Java 21 to build, you can use a standard Adoptium Java 21 JDK instead.
+      jdkUrl.set("https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13.1%2B2/OpenJDK21U-jdk_x64_mac_hotspot_21.0.13.1_2.tar.gz")
       // macOS needs an identifier
       identifier.set("gdx.liftoff." + appName)
       // Optional: icon for macOS, as an ICNS file
@@ -167,8 +197,12 @@ construo {
       architecture.set(Target.Architecture.X86_64)
       // Optional: icon for Windows, as a PNG
       icon.set(project.file("icons/logo.png"))
-      jdkUrl.set("https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.10%2B7/OpenJDK21U-jdk_x64_windows_hotspot_21.0.10_7.zip")
-      // Uncomment the next line to show a console when the game runs, to print messages.
+// You can use the JetBrains Runtime SDK for Java 25 if you need newer language features.
+// This needs you to build using Java 25 as the JDK Gradle uses.
+//      jdkUrl.set("https://cache-redirector.jetbrains.com/intellij-jbr/jbrsdk-25.0.5.1-windows-x64-b635.102.zip")
+// Or, if you are using Java 21 to build, you can use a standard Adoptium Java 21 JDK instead.
+      jdkUrl.set("https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13.1%2B2/OpenJDK21U-jdk_x64_windows_hotspot_21.0.13.1_2.zip")
+// Uncomment the next line to show a console when the game runs, to print messages.
       //useConsole.set(true)
     }
   }
